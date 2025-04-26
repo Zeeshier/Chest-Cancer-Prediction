@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chest Cancer Prediction</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+    <div class="background-glow"></div>
+    <div class="container">
+        <h1>Chest Cancer Predictor</h1>
+        <p class="subheading">Upload a chest CT scan to detect potential abnormalities using Deep Learning.</p>
+
+        <form id="uploadForm" class="upload-form">
+            <input type="file" id="imageInput" accept="image/*" required hidden />
+            <label for="imageInput" class="upload-button">Select CT Scan Image</label>
+            <button type="submit" class="predict-button">Predict</button>
+        </form>
+
+        <div id="result" class="result-box"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
