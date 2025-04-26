@@ -1,0 +1,107 @@
+:root {
+  --background-color: #0a0a23;
+  --text-color: #ffffff;
+  --accent-color: #c2c2c2;
+  --accent-glow: rgba(46, 9, 63, 0.6);
+  --button-hover: #9b72f0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.background-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  filter: blur(100px);
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.container {
+  background: rgba(255, 254, 255, 0.05);
+  backdrop-filter: blur(20px);
+  padding: 40px 30px;
+  border-radius: 20px;
+  text-align: center;
+  width: 90%;
+  max-width: 420px;
+  z-index: 1;
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #e84fe8, #ff8fe3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subheading {
+  font-size: 14px;
+  color: #bbbbbb;
+  margin-bottom: 30px;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.upload-button {
+  background: linear-gradient(135deg, #e84fe8, #ff8fe3);
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.upload-button:hover {
+  background: linear-gradient(135deg, #e84fe8, #ffa1ec);
+}
+
+.predict-button {
+  background: transparent;
+  color: var(--accent-color);
+  padding: 12px;
+  border: 2px solid var(--accent-color);
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.predict-button:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.result-box {
+  margin-top: 25px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
