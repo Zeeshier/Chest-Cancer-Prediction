@@ -21,7 +21,7 @@ model.fc = torch.nn.Sequential(
     torch.nn.Dropout(0.4),
     torch.nn.Linear(256, 4)
 )
-model.load_state_dict(torch.load("chest_cancer_model.pth", map_location=device))
+model.load_state_dict(torch.load("/model/chest_cancer_model.pth", map_location=device))
 model.to(device)
 model.eval()
 
