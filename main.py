@@ -1,10 +1,31 @@
-import streamlit as st
+from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+
 import torch
-from torchvision import models, transforms
+import torchvision.transforms as transforms
+from torchvision import models
 from PIL import Image
 import io
+import os
 
-# Load model
+# FastAPI app
+app = FastAPI()
+
+# Middleware (for CORS - safe communication)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Mount static files and templates
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Define your classes (same from training notebook)
 class_names = [
     "adenocarcinoma_left.lower.lobe",
     "large.cell.carcinoma_left.hilum",
@@ -12,148 +33,49 @@ class_names = [
     "squamous.cell.carcinoma_left.hilum"
 ]
 
-# Descriptions for each class
-class_descriptions = {
-    "adenocarcinoma_left.lower.lobe": "Adenocarcinoma located in the left lower lobe of the lung.",
-    "large.cell.carcinoma_left.hilum": "Large cell carcinoma located at the left hilum of the lung.",
-    "normal": "No signs of cancer. The tissue is normal.",
-    "squamous.cell.carcinoma_left.hilum": "Squamous cell carcinoma located at the left hilum of the lung."
-}
-
+# Load model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Load ResNet18 model and modify the last fully connected layer
-model = models.resnet18()
+model = models.resnet18(weights=None)  # no pretrained weights
 model.fc = torch.nn.Sequential(
-    torch.nn.Linear(model.fc.in_features, 256),
+    torch.nn.Linear(model.fc.in_features, 512),
     torch.nn.ReLU(),
     torch.nn.Dropout(0.4),
+    torch.nn.Linear(512, 256),
+    torch.nn.ReLU(),
     torch.nn.Linear(256, 4)
 )
 
-# Load the trained model weights (ensure correct path in deployment)
-model.load_state_dict(torch.load("\model\chest_cancer_model.pth", map_location=device))
-model.to(device)
+model.load_state_dict(torch.load("/model/chest_cancer_model.pth", map_location=device))
+model = model.to(device)
 model.eval()
 
-# Define image transformation for resizing, normalization
+# Image transform
 transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resizing to 224x224 for better accuracy
+    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    transforms.Normalize([0.485, 0.456, 0.406], 
+                         [0.229, 0.224, 0.225])
 ])
 
-# Add custom CSS for UI improvements
-st.markdown("""
-    <style>
-        body {
-            background-color: #2A0039;  /* Dark purple background */
-            color: #F2C1D1;  /* Light pink text */
-            font-family: 'Arial', sans-serif;
-        }
-        
-        .stButton>button {
-            background-color: #9B4D96; /* Purple button */
-            color: #FFFFFF;
-            border: none;
-            border-radius: 8px;
-            padding: 15px 30px;
-            font-size: 18px;
-            transition: background-color 0.3s ease;
-        }
+# Routes
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    # Serve index.html from root directory
+    return FileResponse("index.html")
 
-        .stButton>button:hover {
-            background-color: #6F2C91;  /* Darker purple for hover effect */
-        }
-
-        .stFileUploader>label {
-            background-color: #9B4D96;
-            color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .stFileUploader>label:hover {
-            background-color: #6F2C91;
-        }
-
-        h1 {
-            font-size: 48px;
-            text-align: center;
-            color: #F2C1D1;
-            margin-top: 50px;
-        }
-
-        h2 {
-            color: #F2C1D1;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .stImage {
-            border-radius: 10px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            transition: transform 0.3s ease;
-        }
-
-        .stImage:hover {
-            transform: scale(1.05);
-        }
-
-        .result-text {
-            font-size: 22px;
-            font-weight: bold;
-            text-align: center;
-            color: #F2C1D1;
-            margin-top: 30px;
-        }
-
-        .result-text span {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .result-text .cancer {
-            color: #E84A5F;
-        }
-
-        .result-text .no-cancer {
-            color: #4CAF50;
-        }
-
-    </style>
-""", unsafe_allow_html=True)
-
-# Streamlit UI
-st.title("Chest Cancer Detection with PyTorch")
-
-# Centering the upload section
-st.write("Upload a chest x-ray image for cancer detection. The model will classify it as one of the following categories:")
-
-uploaded_file = st.file_uploader("Choose an image...", type=["png", "jpg", "jpeg"])
-
-if uploaded_file is not None:
+@app.post("/predict")
+async def predict(file: UploadFile = File(...)):
     try:
-        # Read and display the uploaded image
-        img = Image.open(uploaded_file).convert('RGB')
-        st.image(img, caption="Uploaded Image", use_column_width=True)
+        contents = await file.read()
+        img = Image.open(io.BytesIO(contents)).convert('RGB')
+        img = transform(img).unsqueeze(0).to(device)
 
-        # Apply transformations
-        img_tensor = transform(img).unsqueeze(0).to(device)
-
-        # Make prediction
         with torch.no_grad():
-            outputs = model(img_tensor)
+            outputs = model(img)
             _, predicted = torch.max(outputs, 1)
             prediction = class_names[predicted.item()]
-            description = class_descriptions[prediction]
 
-        # Display prediction result
-        result_color = "no-cancer" if prediction == "normal" else "cancer"
-        st.markdown(f'<p class="result-text">The model predicts: <span class="{result_color}">{prediction}</span></p>', unsafe_allow_html=True)
-        st.write(f"**Description:** {description}")
-
+        return JSONResponse(content={"prediction": prediction})
     except Exception as e:
-        st.error(f"Error: {str(e)}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)
