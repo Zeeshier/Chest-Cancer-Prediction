@@ -11,7 +11,7 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
   resultDiv.textContent = "Analyzing... Please wait.";
 
   try {
-    const res = await fetch("http://localhost:5000/predict", {
+    const res = await fetch("main/predict", {
       method: "POST",
       body: formData,
     });
