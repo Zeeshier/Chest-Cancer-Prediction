@@ -32,7 +32,7 @@ model.fc = torch.nn.Sequential(
 )
 
 # Load the trained model weights (ensure correct path in deployment)
-model.load_state_dict(torch.load("model/chest_cancer_model.pth", map_location=device))
+model.load_state_dict(torch.load("\Chest-Cancer-Prediction\model\chest_cancer_model.pth", map_location=device))
 model.to(device)
 model.eval()
 
