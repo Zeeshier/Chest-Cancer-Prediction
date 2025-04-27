@@ -1,17 +1,32 @@
+const imageInput = document.getElementById('imageInput');
+const imagePreview = document.getElementById('imagePreview');
+const uploadMessage = document.getElementById('uploadMessage');
+const predictButton = document.getElementById('predictButton');
+const resultDiv = document.getElementById('result');
+
+imageInput.addEventListener('change', function () {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      imagePreview.innerHTML = `<img src="${e.target.result}" alt="CT Scan Preview" />`;
+      uploadMessage.textContent = "Image Loaded Successfully!";
+      predictButton.disabled = false;  // Enable Predict button
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
 document.getElementById("uploadForm").addEventListener("submit", async function (e) {
   e.preventDefault();
-
-  const imageInput = document.getElementById("imageInput");
-  if (!imageInput.files.length) return;
-
+  
   const formData = new FormData();
-  formData.append("image", imageInput.files[0]);
-
-  const resultDiv = document.getElementById("result");
-  resultDiv.textContent = "Analyzing... Please wait.";
+  formData.append("file", imageInput.files[0]);
+  
+  resultDiv.textContent = "Predicting...";
 
   try {
-    const res = await fetch("main/predict", {
+    const res = await fetch("/api/chest_cancer/predict", {
       method: "POST",
       body: formData,
     });
@@ -24,6 +39,6 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
     }
   } catch (error) {
     console.error(error);
-    resultDiv.textContent = "Server error. Try again.";
+    resultDiv.textContent = "Server error. Please try again.";
   }
 });

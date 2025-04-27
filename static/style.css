@@ -1,107 +1,98 @@
 :root {
+  --primary-color: #6a5acd;
+  --secondary-color: #9370db;
   --background-color: #0a0a23;
   --text-color: #ffffff;
-  --accent-color: #c2c2c2;
-  --accent-glow: rgba(46, 9, 63, 0.6);
-  --button-hover: #9b72f0;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  --message-color: #00ff95;
 }
 
 body {
-  background-color: var(--background-color);
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--background-color);
   color: var(--text-color);
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  overflow: hidden;
-  position: relative;
-}
-
-.background-glow {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-  filter: blur(100px);
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 0;
 }
 
 .container {
-  background: rgba(255, 254, 255, 0.05);
-  backdrop-filter: blur(20px);
-  padding: 40px 30px;
-  border-radius: 20px;
   text-align: center;
-  width: 90%;
-  max-width: 420px;
-  z-index: 1;
-  box-shadow: 0 0 30px var(--accent-glow);
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  box-shadow: 0 0 30px var(--secondary-color);
+  width: 350px;
 }
 
 h1 {
-  font-size: 30px;
-  margin-bottom: 10px;
-  background: linear-gradient(90deg, #e84fe8, #ff8fe3);
+  margin-bottom: 20px;
+  font-size: 26px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.subheading {
-  font-size: 14px;
-  color: #bbbbbb;
-  margin-bottom: 30px;
-}
-
-.upload-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.upload-button {
-  background: linear-gradient(135deg, #e84fe8, #ff8fe3);
-  color: #fff;
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
+.upload-label {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 12px 25px;
+  border-radius: 10px;
   font-weight: bold;
-  transition: background 0.3s ease;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: 20px;
+  transition: transform 0.3s;
 }
 
-.upload-button:hover {
-  background: linear-gradient(135deg, #e84fe8, #ffa1ec);
+.upload-label:hover {
+  transform: scale(1.05);
 }
 
-.predict-button {
+.preview {
+  margin: 15px 0;
+}
+
+.preview img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.message {
+  margin-top: 10px;
+  font-size: 16px;
+  color: var(--message-color);
+}
+
+.predict-btn {
   background: transparent;
-  color: var(--accent-color);
-  padding: 12px;
-  border: 2px solid var(--accent-color);
-  border-radius: 12px;
-  cursor: pointer;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 12px 20px;
+  margin-top: 15px;
   font-weight: bold;
-  transition: all 0.3s ease;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  width: 100%;
 }
 
-.predict-button:hover {
-  background: var(--accent-color);
-  color: #fff;
+.predict-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.predict-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
 }
 
 .result-box {
-  margin-top: 25px;
+  margin-top: 20px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: bold;
   color: var(--text-color);
 }
