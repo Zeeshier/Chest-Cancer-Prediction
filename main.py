@@ -12,8 +12,17 @@ class_names = [
     "squamous.cell.carcinoma_left.hilum"
 ]
 
+# Descriptions for each class
+class_descriptions = {
+    "adenocarcinoma_left.lower.lobe": "Adenocarcinoma located in the left lower lobe of the lung.",
+    "large.cell.carcinoma_left.hilum": "Large cell carcinoma located at the left hilum of the lung.",
+    "normal": "No signs of cancer. The tissue is normal.",
+    "squamous.cell.carcinoma_left.hilum": "Squamous cell carcinoma located at the left hilum of the lung."
+}
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Load ResNet18 model and modify the last fully connected layer
 model = models.resnet18()
 model.fc = torch.nn.Sequential(
     torch.nn.Linear(model.fc.in_features, 256),
@@ -21,12 +30,15 @@ model.fc = torch.nn.Sequential(
     torch.nn.Dropout(0.4),
     torch.nn.Linear(256, 4)
 )
+
+# Load the trained model weights (ensure correct path in deployment)
 model.load_state_dict(torch.load("/model/chest_cancer_model.pth", map_location=device))
 model.to(device)
 model.eval()
 
+# Define image transformation for resizing, normalization
 transform = transforms.Compose([
-    transforms.Resize((64, 64)),
+    transforms.Resize((224, 224)),  # Resizing to 224x224 for better accuracy
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
@@ -136,10 +148,12 @@ if uploaded_file is not None:
             outputs = model(img_tensor)
             _, predicted = torch.max(outputs, 1)
             prediction = class_names[predicted.item()]
+            description = class_descriptions[prediction]
 
         # Display prediction result
         result_color = "no-cancer" if prediction == "normal" else "cancer"
         st.markdown(f'<p class="result-text">The model predicts: <span class="{result_color}">{prediction}</span></p>', unsafe_allow_html=True)
+        st.write(f"**Description:** {description}")
 
     except Exception as e:
         st.error(f"Error: {str(e)}")
